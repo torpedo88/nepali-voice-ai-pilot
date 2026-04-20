@@ -1,0 +1,22 @@
+# Terraform state + locks
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Terragrunt cache
+.terragrunt-cache/
+
+# Generated files (provider.tf, backend.tf, versions.tf written by root terragrunt.hcl)
+**/provider.tf
+**/backend.tf
+
+# Secret tfvars (never commit)
+*.tfvars.secret
+*.auto.tfvars
+terraform.tfvars
+
+# OCI API keys
+oci_api_key*.pem
+s3_credentials
