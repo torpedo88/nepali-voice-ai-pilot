@@ -655,7 +655,7 @@ Create `infra/live/nepali/env.hcl`:
 ```hcl
 locals {
   # Region — override to your OCI home region.
-  region = "us-ashburn-1"
+  region = "us-phoenix-1"
 
   # Named profile in ~/.oci/config used by the OCI provider.
   # Created by: `oci setup config` → "Add profile to existing config" → nepali-voice-ai
@@ -1006,7 +1006,7 @@ export OCI_NAMESPACE="$(oci os ns get --profile nepali-voice-ai --query data --r
 
 User OCID, fingerprint, and private key path are read by the OCI provider from the `[nepali-voice-ai]` profile in `~/.oci/config` — no env vars needed for those.
 
-Also edit `live/nepali/env.hcl` if your home region isn't `us-ashburn-1`.
+Also edit `live/nepali/env.hcl` if your home region isn't `us-phoenix-1`.
 
 ## Bootstrap (once)
 

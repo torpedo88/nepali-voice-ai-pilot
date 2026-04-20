@@ -152,7 +152,7 @@ inputs = { subnet_id = dependency.network.outputs.subnet_id }
 
 ```hcl
 locals {
-  region              = "us-ashburn-1"  # override for your home region
+  region              = "us-phoenix-1"  # override for your home region
   compartment_ocid    = get_env("TF_VAR_compartment_ocid")
   tenancy_ocid        = get_env("TF_VAR_tenancy_ocid")
   namespace           = get_env("OCI_NAMESPACE")
