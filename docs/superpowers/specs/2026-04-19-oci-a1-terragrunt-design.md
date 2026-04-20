@@ -65,12 +65,14 @@ infra/
   Auth via Customer Secret Keys in `~/.oci/s3_credentials`.
   No locking backend — solo single-writer use is acceptable; migrate to a
   locking-aware backend if/when sharing.
-- **`generate "provider"`** — writes `provider.tf`. `region` is
-  interpolated directly from `env.hcl` locals (single source of truth);
-  identity fields (`tenancy_ocid`, `user_ocid`, `fingerprint`,
-  `private_key_path`) come from env vars (`TF_VAR_tenancy_ocid`,
-  `TF_VAR_user_ocid`, `TF_VAR_fingerprint`, `TF_VAR_private_key_path`) so
-  secrets never touch the repo.
+- **`generate "provider"`** — writes `provider.tf` using
+  `config_file_profile = "nepali-voice-ai"` — a named profile in
+  `~/.oci/config`. `region` is interpolated from `env.hcl` locals. The
+  user/tenancy/fingerprint/private_key values are read from the profile at
+  apply time; no secrets in env vars or repo. Tenancy and compartment
+  OCIDs are still needed as env vars (`TF_VAR_tenancy_ocid`,
+  `TF_VAR_compartment_ocid`) because they're referenced at HCL parse time,
+  before the provider initializes.
 - **`generate "versions"`** — pins `terraform >= 1.6`, `oci ~> 5.30`.
 - **`inputs`** — merges `env.hcl` values into every child stack.
 

@@ -657,12 +657,17 @@ locals {
   # Region — override to your OCI home region.
   region = "us-ashburn-1"
 
-  # Identity (sourced from env vars; never committed).
+  # Named profile in ~/.oci/config used by the OCI provider.
+  # Created by: `oci setup config` → "Add profile to existing config" → nepali-voice-ai
+  oci_profile = "nepali-voice-ai"
+
+  # OCIDs (sourced from env vars; never committed). Can't be inferred from the
+  # profile name at HCL parse time, so we still need these two.
   tenancy_ocid     = get_env("TF_VAR_tenancy_ocid")
   compartment_ocid = get_env("TF_VAR_compartment_ocid")
 
   # Object Storage namespace for the state backend endpoint.
-  # Get yours with: oci os ns get --query data --raw-output
+  # Get yours with: oci os ns get --profile nepali-voice-ai --query data --raw-output
   namespace = get_env("OCI_NAMESPACE")
 
   # Project-wide naming + inputs.
@@ -723,11 +728,8 @@ generate "provider" {
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 provider "oci" {
-  tenancy_ocid     = "${local.env.locals.tenancy_ocid}"
-  user_ocid        = "${get_env("TF_VAR_user_ocid")}"
-  fingerprint      = "${get_env("TF_VAR_fingerprint")}"
-  private_key_path = "${get_env("TF_VAR_private_key_path")}"
-  region           = "${local.env.locals.region}"
+  config_file_profile = "${local.env.locals.oci_profile}"
+  region              = "${local.env.locals.region}"
 }
 EOF
 }
@@ -862,12 +864,11 @@ Create `infra/bootstrap/bootstrap.sh`:
 # bootstrap.sh — one-shot setup before the first `terragrunt apply`.
 #
 # Idempotent. Safe to re-run. Requires:
-#   - oci CLI installed and ~/.oci/config configured
-#   - env vars exported: TF_VAR_tenancy_ocid, TF_VAR_compartment_ocid,
-#     TF_VAR_user_ocid, TF_VAR_fingerprint, TF_VAR_private_key_path,
-#     OCI_NAMESPACE
+#   - oci CLI installed and ~/.oci/config with a [nepali-voice-ai] profile
+#   - env vars exported: TF_VAR_tenancy_ocid, TF_VAR_compartment_ocid, OCI_NAMESPACE
 set -euo pipefail
 
+OCI_PROFILE="nepali-voice-ai"
 SSH_KEY="${HOME}/.ssh/oci_nepali_a1"
 S3_CREDS="${HOME}/.oci/s3_credentials"
 BUCKET="nepali-voice-ai-tfstate"
@@ -881,7 +882,14 @@ say "Checking oci CLI..."
 command -v oci >/dev/null 2>&1 || die "oci CLI not found. Install: https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm"
 [ -f "${HOME}/.oci/config" ] || die "~/.oci/config not found. Run: oci setup config"
 
-for v in TF_VAR_tenancy_ocid TF_VAR_compartment_ocid TF_VAR_user_ocid TF_VAR_fingerprint TF_VAR_private_key_path OCI_NAMESPACE; do
+# Profile must exist in ~/.oci/config
+grep -q "^\[${OCI_PROFILE}\]" "${HOME}/.oci/config" || die "Profile [${OCI_PROFILE}] not found in ~/.oci/config. Run: oci setup config and add profile '${OCI_PROFILE}'."
+
+# Profile must actually work against OCI
+say "Verifying profile '${OCI_PROFILE}' can call OCI..."
+oci iam region list --profile "${OCI_PROFILE}" --query 'data[0].name' --raw-output >/dev/null || die "OCI call failed with profile '${OCI_PROFILE}'. Check that the API public key is uploaded in OCI Console → User → API Keys."
+
+for v in TF_VAR_tenancy_ocid TF_VAR_compartment_ocid OCI_NAMESPACE; do
   [ -n "${!v:-}" ] || die "env var $v not set"
 done
 
@@ -914,14 +922,15 @@ fi
 
 # --- 4. State bucket ------------------------------------------------------
 say "Ensuring state bucket '${BUCKET}' exists in compartment ${TF_VAR_compartment_ocid}..."
-if oci os bucket get --name "${BUCKET}" --namespace-name "${OCI_NAMESPACE}" >/dev/null 2>&1; then
+if oci os bucket get --name "${BUCKET}" --namespace-name "${OCI_NAMESPACE}" --profile "${OCI_PROFILE}" >/dev/null 2>&1; then
   say "Bucket exists. Skipping."
 else
   oci os bucket create \
     --name "${BUCKET}" \
     --compartment-id "${TF_VAR_compartment_ocid}" \
     --namespace-name "${OCI_NAMESPACE}" \
-    --versioning Enabled
+    --versioning Enabled \
+    --profile "${OCI_PROFILE}"
   say "Bucket created."
 fi
 
@@ -979,7 +988,7 @@ Plan: [`../docs/superpowers/plans/2026-04-19-oci-a1-terragrunt.md`](../docs/supe
 
 ## Prereqs
 
-- OCI tenancy + user with API keys (`oci setup config` → `~/.oci/config`)
+- OCI tenancy + user with a **named CLI profile** `nepali-voice-ai` in `~/.oci/config` (`oci setup config` → add profile)
 - OCI CLI: `brew install oci-cli`
 - Terraform `>= 1.6`: `brew install terraform`
 - Terragrunt `>= 0.55`: `brew install terragrunt`
@@ -992,11 +1001,10 @@ Export these in your shell (e.g. `~/.zshrc` or a `.envrc` via direnv):
 ```bash
 export TF_VAR_tenancy_ocid="ocid1.tenancy.oc1..xxx"
 export TF_VAR_compartment_ocid="ocid1.compartment.oc1..xxx"  # can equal tenancy_ocid for root
-export TF_VAR_user_ocid="ocid1.user.oc1..xxx"
-export TF_VAR_fingerprint="xx:xx:xx:..."
-export TF_VAR_private_key_path="$HOME/.oci/oci_api_key.pem"
-export OCI_NAMESPACE="$(oci os ns get --query data --raw-output)"
+export OCI_NAMESPACE="$(oci os ns get --profile nepali-voice-ai --query data --raw-output)"
 ```
+
+User OCID, fingerprint, and private key path are read by the OCI provider from the `[nepali-voice-ai]` profile in `~/.oci/config` — no env vars needed for those.
 
 Also edit `live/nepali/env.hcl` if your home region isn't `us-ashburn-1`.
 
