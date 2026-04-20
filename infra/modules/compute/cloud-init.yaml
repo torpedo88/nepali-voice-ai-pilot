@@ -1,0 +1,29 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - python3.11
+  - python3.11-venv
+  - python3-pip
+  - ffmpeg
+  - git
+  - tmux
+  - htop
+  - ufw
+
+runcmd:
+  - [ ufw, allow, "22/tcp" ]
+  - [ ufw, allow, "80/tcp" ]
+  - [ ufw, allow, "443/tcp" ]
+  - [ ufw, allow, "7860/tcp" ]
+  - [ ufw, --force, enable ]
+  - [ systemctl, enable, --now, ufw ]
+
+write_files:
+  - path: /etc/motd
+    content: |
+      Nepali Voice AI — OCI A1.Flex
+      Provisioned by Terragrunt. See docs/superpowers/specs/ in the repo.
+    permissions: "0644"
