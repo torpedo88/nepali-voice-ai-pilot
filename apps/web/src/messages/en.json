@@ -1,0 +1,39 @@
+{
+  "site": {
+    "name": "Nepali Voice AI",
+    "tagline": "Community-owned, open-source Nepali Voice AI"
+  },
+  "nav": {
+    "speak": "Speak",
+    "contribute": "Contribute",
+    "login": "Sign in",
+    "logout": "Sign out"
+  },
+  "landing": {
+    "heading": "Speak Nepali. The AI responds in Nepali.",
+    "sub": "A community-built voice assistant trained on 256+ Nepali recordings. Try it now — no signup needed.",
+    "cta_speak": "Start talking",
+    "cta_learn": "Learn more"
+  },
+  "speak": {
+    "heading": "Speak Nepali",
+    "hint": "Tap the mic, speak 1–2 sentences in Nepali, then tap again to stop.",
+    "voice_label": "Voice",
+    "voices": {
+      "male": "Sagar (Male)",
+      "female": "Hemkala (Female)"
+    },
+    "you_said": "You said",
+    "ai_replied": "AI replied",
+    "recording": "Recording…",
+    "thinking": "Thinking…",
+    "error_no_mic": "Microphone access was denied. Enable it in browser settings.",
+    "error_generic": "Something went wrong. Try again."
+  },
+  "login": {
+    "heading": "Sign in to Nepali Voice AI",
+    "sub": "One account across overseasnepal.com and voice.overseasnepal.com.",
+    "email_placeholder": "you@example.com",
+    "submit": "Send magic link"
+  }
+}

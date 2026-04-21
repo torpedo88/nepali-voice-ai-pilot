@@ -1,0 +1,10 @@
+# Ignore all audio files in contributions
+*.wav
+*.mp3
+*.webm
+*.ogg
+*.m4a
+
+# But keep metadata and structure
+!.gitignore
+!README.md

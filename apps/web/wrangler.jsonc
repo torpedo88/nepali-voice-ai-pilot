@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "nepali-voice-web",
+  "account_id": "8cc524a8f54075cc168ad45cce43e417",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    { "pattern": "voice.overseasnepal.com", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "env": {
+    "preview": {
+      "name": "nepali-voice-web-preview",
+      "routes": [
+        { "pattern": "voice-preview.overseasnepal.com", "custom_domain": true }
+      ]
+    }
+  }
+}

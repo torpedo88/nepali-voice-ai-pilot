@@ -16,5 +16,10 @@ dependency "network" {
 }
 
 inputs = {
-  subnet_id = dependency.network.outputs.subnet_id
+  subnet_id                 = dependency.network.outputs.subnet_id
+  availability_domain_index = 2 # AD-3
+  instance_shape_config = {
+    ocpus         = 2
+    memory_in_gbs = 12
+  }
 }

@@ -1,0 +1,29 @@
+# Standalone compose for the Nepali Voice AI backend.
+# Runs alongside the existing n8n stack on the same A1 host — no shared services.
+# Reverse proxy (Caddy/Traefik/nginx) lives in the n8n stack and routes
+# voice-api.overseasnepal.com → localhost:8001 (mapped below).
+
+services:
+  nepali-voice-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms: [linux/arm64]
+    image: nepali-voice-api:latest
+    container_name: nepali-voice-api
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8001:8000"   # bind to loopback only; the n8n reverse proxy reaches us over localhost
+    # If n8n's reverse proxy lives in its own Docker network (not host-mode),
+    # uncomment the block below and set `name:` to the actual network
+    # (find with: `docker network ls` then `docker inspect <name>` to confirm the proxy is attached).
+    #
+    # networks:
+    #   - default
+    #   - proxy
+    #
+    # networks:
+    #   proxy:
+    #     external: true
+    #     name: <your-n8n-proxy-network-name>
